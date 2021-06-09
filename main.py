@@ -30,7 +30,7 @@ def main(arg):
 
     for i in range(arg.epochs):
         loss = train_fn(train_dataloader, model, optimizer, CE_Loss, device)
-    print("epochs {} / {}  train_loss {}: ".format(i + 1, arg.epochs, loss))
+        print("epochs {} / {}  train_loss {}: ".format(i + 1, arg.epochs, loss))
 
 
 if __name__ == "__main__":
