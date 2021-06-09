@@ -1,7 +1,9 @@
-import torch
-from torch.utils.data import Dataset
 import pandas as pd
-from transformers import AutoTokenizer, AutoConfig, AutoModel
+import torch
+from torch.utils.data import DataLoader, Dataset
+from transformers import AutoTokenizer
+
+from models import DecoderModel
 from tokenizer import VnCoreTokenizer
 
 
@@ -15,8 +17,8 @@ class BertDataset(Dataset):
     ):
         super(BertDataset, self).__init__()
         """
-      Args: 
-        df(pd.DataFrame): DataFrame for all arguments 
+      Args:
+        df(pd.DataFrame): DataFrame for all arguments
         tokenizer : Pretrained PhoBert
     """
         self.corevn_tokenizer = corevn_tokenizer
@@ -31,11 +33,7 @@ class BertDataset(Dataset):
 
     def __getitem__(self, idx):
         content = self.content[idx]
-        print(content)
         content = self.corevn_tokenizer.tokenize(content)
-        print("----------------------------------")
-        print(content)
-        print("-----------------------------------")
         label = self.label[idx]
         (
             content_input_ids,
@@ -70,12 +68,19 @@ class BertDataset(Dataset):
         return input_ids, attention_mask, token_type_ids
 
 
-# if __name__ == "__main__":
-#     vncore_tokenizer = VnCoreTokenizer("./vncorenlp/VnCoreNLP-1.1.1.jar")
-#     tokenizer = AutoTokenizer.from_pretrained("vinai/phobert-base", use_fast=False)
-#     bert_model = "vinai/phobert-base"
-#     config = AutoConfig.from_pretrained(bert_model, from_tf=False)
-#     bert = AutoModel.from_pretrained(bert_model, config)
-#     val_df = pd.read_excel("./data/train.xlsx")
-#     val_dataset = BertDataset(val_df, tokenizer, 64, vncore_tokenizer)
-#     print(val_dataset[1])
+if __name__ == "__main__":
+    vncore_tokenizer = VnCoreTokenizer("./vncorenlp/VnCoreNLP-1.1.1.jar")
+    tokenizer = AutoTokenizer.from_pretrained("vinai/phobert-base", use_fast=False)
+    bert_model = "vinai/phobert-base"
+    val_df = pd.read_excel("./data/train.xlsx")
+    val_dataset = BertDataset(val_df, tokenizer, 64, vncore_tokenizer)
+    val_dataloader = DataLoader(val_dataset, batch_size=1)
+    model = DecoderModel(bert_model, 4, 0.3)
+    for input in val_dataloader:
+        output = model(
+            content_input_ids=input["content_input_ids"],
+            content_attention_mask=input["content_attention_mask"],
+            content_token_type_ids=input["content_token_type_ids"],
+        )
+        print(output.shape)
+        break
