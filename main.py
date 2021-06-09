@@ -22,11 +22,12 @@ def main(arg):
     df = pd.read_excel("./data/train.xlsx")
     train_df, val_df = train_test_split(df, test_size=0.2, stratify=df["label"])
     train_dataset = BertDataset(train_df, tokenizer, arg.max_len, vncore_tokenizer)
-    BertDataset(val_df, tokenizer, arg.max_len, vncore_tokenizer)
+    val_dataset = BertDataset(val_df, tokenizer, arg.max_len, vncore_tokenizer)
     train_dataloader = DataLoader(
         train_dataset, batch_size=arg.batch_size, shuffle=True
     )
-    val_dataloder = DataLoader(val_dataloder, batch_size=arg.batch_size, shuffle=False)
+
+    val_dataloder = DataLoader(val_dataset, batch_size=arg.batch_size, shuffle=False)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = DecoderModel(bert_model, arg.n_class, 0.3).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=arg.lr)
