@@ -2,7 +2,7 @@ from tqdm.auto import tqdm
 
 
 def train_fn(data_loader, model, optimizer, loss_fn, device):
-    model.eval()
+    model.train()
     train_loss = 0
     for bi, d in tqdm(enumerate(data_loader), total=len(data_loader)):
         content_input_ids = d["content_input_ids"].to(device)
