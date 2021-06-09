@@ -1,5 +1,6 @@
-from vncorenlp import VnCoreNLP
 import re
+
+from vncorenlp import VnCoreNLP
 
 
 class VnCoreTokenizer:
@@ -26,7 +27,7 @@ class VnCoreTokenizer:
 #     tokenizer = VnCoreTokenizer("./vncorenlp/VnCoreNLP-1.1.1.jar")
 #     print(
 #         tokenizer.tokenize(
-#             "Tôi là Nguyễn Đức Long sinh viên đại học Bách Khoa Hà Nội. Lớp Công nghệ thông tin"
+#             "Tôi là Nguyễn Đức Long sinh viên đại học Bách Khoa Hà Nội.
+#               Lớp Công nghệ thông tin"
 #         )
 #     )
-

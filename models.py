@@ -1,6 +1,6 @@
-from transformers import AutoConfig, AutoModel
 import torch
 import torch.nn as nn
+from transformers import AutoConfig, AutoModel
 
 
 class DecoderModel(nn.Module):
