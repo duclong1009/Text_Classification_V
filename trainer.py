@@ -1,3 +1,4 @@
+import torch
 from tqdm.auto import tqdm
 
 
@@ -20,3 +21,31 @@ def train_fn(data_loader, model, optimizer, loss_fn, device):
         optimizer.step()
         train_loss += loss.item()
     return train_loss / len(data_loader)
+
+
+def eval_fn(data_loader, model, device):
+    model.eval()
+    fin_targets = []
+    fin_outputs = []
+    with torch.no_grad():
+        for bi, d in tqdm(enumerate(data_loader), total=len(data_loader)):
+            ids = d["content_input_ids"]
+            token_type_ids = d["content_token_type_ids"]
+            mask = d["content_attention_mask"]
+            targets = d["label"]
+
+            ids = ids.to(device, dtype=torch.long)
+            token_type_ids = token_type_ids.to(device, dtype=torch.long)
+            mask = mask.to(device, dtype=torch.long)
+            targets = targets.to(device, dtype=torch.float)
+            outputs = model(
+                content_input_ids=ids,
+                content_attention_mask=mask,
+                content_token_type_ids=token_type_ids,
+            )
+            # print(outputs.shape)
+            output = torch.argmax(outputs, dim=-1)
+            fin_targets.extend(targets.cpu().detach().numpy().tolist())
+            fin_outputs.extend(torch.sigmoid(output).cpu().detach().numpy().tolist())
+            print(len(fin_outputs), len(fin_targets))
+    return fin_outputs, fin_targets

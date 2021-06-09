@@ -10,7 +10,7 @@ from transformers import AutoTokenizer
 from dataset import BertDataset
 from models import DecoderModel
 from tokenizer import VnCoreTokenizer
-from trainer import train_fn
+from trainer import eval_fn, train_fn
 from utils import seed_all
 
 
@@ -21,8 +21,12 @@ def main(arg):
     bert_model = arg.bert_model
     df = pd.read_excel("./data/train.xlsx")
     train_df, val_df = train_test_split(df, test_size=0.2, stratify=df["label"])
-    train_dataset = BertDataset(val_df, tokenizer, 64, vncore_tokenizer)
-    train_dataloader = DataLoader(train_dataset, batch_size=arg.batch_size)
+    train_dataset = BertDataset(train_df, tokenizer, arg.max_len, vncore_tokenizer)
+    BertDataset(val_df, tokenizer, arg.max_len, vncore_tokenizer)
+    train_dataloader = DataLoader(
+        train_dataset, batch_size=arg.batch_size, shuffle=True
+    )
+    val_dataloder = DataLoader(val_dataloder, batch_size=arg.batch_size, shuffle=False)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = DecoderModel(bert_model, arg.n_class, 0.3).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=arg.lr)
@@ -30,7 +34,13 @@ def main(arg):
 
     for i in range(arg.epochs):
         loss = train_fn(train_dataloader, model, optimizer, CE_Loss, device)
-    print("epochs {} / {}  train_loss {}: ".format(i + 1, arg.epochs, loss))
+        output, target = eval_fn(val_dataloder, model, device)
+        accuracy = sum(output == target) / len(target)
+        print(
+            "epochs {} / {}  train_loss : {}  val_acc : {}".format(
+                i + 1, arg.epochs, loss, accuracy
+            )
+        )
 
 
 if __name__ == "__main__":
