@@ -26,7 +26,7 @@ def main(arg):
     model = DecoderModel(bert_model, arg.n_class, 0.3)
     optimizer = torch.optim.AdamW(model.parameters(), lr=arg.lr)
     CE_Loss = nn.CrossEntropyLoss()
-    device = torch.device("cpu")
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     for i in range(arg.epochs):
         loss = train_fn(train_dataloader, model, optimizer, CE_Loss, device)
     print("epochs {} / {}  train_loss {}: ".format(i + 1,arg.epochs, loss))
