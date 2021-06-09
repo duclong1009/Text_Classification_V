@@ -29,7 +29,7 @@ def main(arg):
     device = torch.device("cpu")
     for i in range(arg.epochs):
         loss = train_fn(train_dataloader, model, optimizer, CE_Loss, device)
-    print("epochs {} / 5  train_loss {}: ".format(i + 1, loss))
+    print("epochs {} / {}  train_loss {}: ".format(i + 1,arg.epochs, loss))
 
 
 if __name__ == "__main__":
