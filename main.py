@@ -1,5 +1,6 @@
 import argparse
 
+import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
@@ -20,7 +21,9 @@ def main(arg):
     tokenizer = AutoTokenizer.from_pretrained(arg.bert_tokenizer, use_fast=False)
     bert_model = arg.bert_model
     df = pd.read_excel("./data/train.xlsx")
-    train_df, val_df = train_test_split(df, test_size=0.2, stratify=df["label"])
+    train_df, val_df = train_test_split(
+        df, test_size=arg.test_size, stratify=df["label"]
+    )
     train_dataset = BertDataset(train_df, tokenizer, arg.max_len, vncore_tokenizer)
     val_dataset = BertDataset(val_df, tokenizer, arg.max_len, vncore_tokenizer)
     train_dataloader = DataLoader(
@@ -36,7 +39,7 @@ def main(arg):
     for i in range(arg.epochs):
         loss = train_fn(train_dataloader, model, optimizer, CE_Loss, device)
         output, target = eval_fn(val_dataloder, model, device)
-        accuracy = sum(output == target) / len(target)
+        accuracy = sum(np.array(output) == np.array(target)) / len(target)
         print(
             "epochs {} / {}  train_loss : {}  val_acc : {}".format(
                 i + 1, arg.epochs, loss, accuracy
@@ -55,6 +58,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--vncore_tokenizer", type=str, default="./vncorenlp/VnCoreNLP-1.1.1.jar"
     )
+    parser.add_argument("--test_size", type=int, default=0.2)
     parser.add_argument("--max_len", type=int, default=64)
     parser.add_argument("--n_class", type=int, default=4)
     parser.add_argument("--fig_root", type=str, default="./data")

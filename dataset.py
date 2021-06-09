@@ -1,10 +1,7 @@
 import pandas as pd
 import torch
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import Dataset
 from transformers import AutoTokenizer
-
-from models import DecoderModel
-from tokenizer import VnCoreTokenizer
 
 
 class BertDataset(Dataset):
@@ -68,28 +65,27 @@ class BertDataset(Dataset):
         return input_ids, attention_mask, token_type_ids
 
 
-import torch
+# import torch
 
-if __name__ == "__main__":
-    from sklearn.model_selection import train_test_split
+# if __name__ == "__main__":
+#     from sklearn.model_selection import train_test_split
 
-    from trainer import eval_fn
+#     from trainer import eval_fn
 
-    vncore_tokenizer = VnCoreTokenizer("./vncorenlp/VnCoreNLP-1.1.1.jar")
-    tokenizer = AutoTokenizer.from_pretrained("vinai/phobert-base", use_fast=False)
-    bert_model = "vinai/phobert-base"
-    val_df = pd.read_excel("./data/train.xlsx")
-    train_df, val_df = train_test_split(val_df, test_size=0.2, stratify=val_df["label"])
-    val_dataset = BertDataset(val_df, tokenizer, 64, vncore_tokenizer)
-    val_dataloader = DataLoader(val_dataset, batch_size=1)
-    model = DecoderModel(bert_model, 4, 0.3)
-    output, target = eval_fn(val_dataloader, model, torch.device("cpu"))
-    print(len(output), len(target))
-    # for input in val_dataloader:
-    #     output = model(
-    #         content_input_ids=input["content_input_ids"],
-    #         content_attention_mask=input["content_attention_mask"],
-    #         content_token_type_ids=input["content_token_type_ids"],
-    #     )
-    #     print(output.shape)
-    #     break
+#     vncore_tokenizer = VnCoreTokenizer("./vncorenlp/VnCoreNLP-1.1.1.jar")
+#     tokenizer = AutoTokenizer.from_pretrained("vinai/phobert-base", use_fast=False)
+#     bert_model = "vinai/phobert-base"
+#     val_df = pd.read_excel("./data/train.xlsx")
+#     train_df, val_df = train_test_split(val_df, test_size=0.2, stratify=val_df["label"])
+#     val_dataset = BertDataset(val_df, tokenizer, 64, vncore_tokenizer)
+#     val_dataloader = DataLoader(val_dataset, batch_size=1)
+#     model = DecoderModel(bert_model, 4, 0.3)
+#     output, target = eval_fn(val_dataloader, model, torch.device("cpu"))
+#     for input in val_dataloader:
+#         output = model(
+#             content_input_ids=input["content_input_ids"],
+#             content_attention_mask=input["content_attention_mask"],
+#             content_token_type_ids=input["content_token_type_ids"],
+#         )
+#         print(output.shape)
+#         break
