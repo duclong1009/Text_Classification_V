@@ -1,5 +1,5 @@
 import torch
-from tqdm.auto import tqdm
+from tqdm import tqdm
 
 
 def train_fn(data_loader, model, optimizer, loss_fn, device):
@@ -43,9 +43,7 @@ def eval_fn(data_loader, model, device):
                 content_attention_mask=mask,
                 content_token_type_ids=token_type_ids,
             )
-            # print(outputs.shape)
             output = torch.argmax(outputs, dim=-1)
             fin_targets.extend(targets.cpu().detach().numpy().tolist())
-            fin_outputs.extend(torch.sigmoid(output).cpu().detach().numpy().tolist())
-            print(len(fin_outputs), len(fin_targets))
+            fin_outputs.extend(output.cpu().detach().numpy().tolist())
     return fin_outputs, fin_targets
