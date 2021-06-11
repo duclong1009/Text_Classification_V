@@ -46,8 +46,7 @@ def main(arg):
                 i + 1, arg.epochs, loss, accuracy
             )
         )
-
-    es(accuracy, model, optimizer)
+        es(accuracy, model, optimizer)
 
     test_df = pd.read_excel(arg.fig_root + "/news.xlsx")
     test_df, _ = train_test_split(test_df, train_size=0.005)
