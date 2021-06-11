@@ -22,7 +22,7 @@ def main(arg):
     bert_model = arg.bert_model
     df = pd.read_excel("./data/train.xlsx")
     train_df, val_df = train_test_split(
-        df, test_size=0.001, train_size=0.005, stratify=df["label"]
+        df, test_size=arg.test_size, stratify=df["label"]
     )
     train_dataset = BertDataset(train_df, tokenizer, arg.max_len, vncore_tokenizer)
     val_dataset = BertDataset(val_df, tokenizer, arg.max_len, vncore_tokenizer)
@@ -35,7 +35,8 @@ def main(arg):
     model = DecoderModel(bert_model, arg.n_class, 0.3).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=arg.lr)
     CE_Loss = nn.CrossEntropyLoss()
-    es = EarlyStopping(3, path=arg.path_checkpoint)
+    es = EarlyStopping(3, path=(arg.path_checkpoint + arg.name_model))
+
     for i in range(arg.epochs):
         loss = train_fn(train_dataloader, model, optimizer, CE_Loss, device)
         output, target = eval_fn(val_dataloder, model, device)
@@ -45,7 +46,7 @@ def main(arg):
                 i + 1, arg.epochs, loss, accuracy
             )
         )
-        # es(accuracy, model, optimizer)
+        es(accuracy, model, optimizer)
 
     test_df = pd.read_excel(arg.fig_root + "/news.xlsx")
     test_df, _ = train_test_split(test_df, train_size=0.005)
@@ -67,10 +68,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--vncore_tokenizer", type=str, default="./vncorenlp/VnCoreNLP-1.1.1.jar"
     )
-    parser.add_argument("--path_checkpoint", type=str, default="./checkpoint")
+
+    parser.add_argument("--path_checkpoint", type=str, default="./checkpoint/")
+    parser.add_argument("--name_model", type=str, default="510_first_token")
     parser.add_argument("--test_size", type=int, default=0.2)
     parser.add_argument("--max_len", type=int, default=64)
     parser.add_argument("--n_class", type=int, default=4)
     parser.add_argument("--fig_root", type=str, default="./data")
+
     args = parser.parse_args()
     main(args)
