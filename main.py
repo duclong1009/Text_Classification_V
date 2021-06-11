@@ -46,7 +46,8 @@ def main(arg):
                 i + 1, arg.epochs, loss, accuracy
             )
         )
-        es(accuracy, model, optimizer)
+
+    es(accuracy, model, optimizer)
 
     test_df = pd.read_excel(arg.fig_root + "/news.xlsx")
     test_df, _ = train_test_split(test_df, train_size=0.005)
@@ -75,6 +76,5 @@ if __name__ == "__main__":
     parser.add_argument("--max_len", type=int, default=64)
     parser.add_argument("--n_class", type=int, default=4)
     parser.add_argument("--fig_root", type=str, default="./data")
-
     args = parser.parse_args()
     main(args)
