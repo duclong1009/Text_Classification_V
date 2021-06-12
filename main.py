@@ -20,7 +20,7 @@ def main(arg):
     vncore_tokenizer = VnCoreTokenizer(arg.vncore_tokenizer)
     tokenizer = AutoTokenizer.from_pretrained(arg.bert_tokenizer, use_fast=False)
     bert_model = arg.bert_model
-    df = pd.read_excel("./data/train.xlsx")
+    df = pd.read_excel(arg.root_path + "data/train.xlsx")
     train_df, val_df = train_test_split(
         df, test_size=arg.test_size, stratify=df["label"]
     )
@@ -35,7 +35,7 @@ def main(arg):
     model = DecoderModel(bert_model, arg.n_class, 0.3).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=arg.lr)
     CE_Loss = nn.CrossEntropyLoss()
-    es = EarlyStopping(3, path=(arg.path_checkpoint + arg.name_model))
+    es = EarlyStopping(3, path=(arg.root_path + arg.name_model))
 
     for i in range(arg.epochs):
         loss = train_fn(train_dataloader, model, optimizer, CE_Loss, device)
@@ -48,7 +48,7 @@ def main(arg):
         )
         es(accuracy, model, optimizer)
 
-    test_df = pd.read_excel(arg.fig_root + "/news.xlsx")
+    test_df = pd.read_excel(arg.fig_root + "data/news.xlsx")
     test_df, _ = train_test_split(test_df, train_size=0.005)
     test_dataset = BertDataset(test_df, tokenizer, arg.max_len, vncore_tokenizer)
     test_dataloder = DataLoader(test_dataset, arg.batch_size, shuffle=False)
@@ -69,11 +69,11 @@ if __name__ == "__main__":
         "--vncore_tokenizer", type=str, default="./vncorenlp/VnCoreNLP-1.1.1.jar"
     )
 
-    parser.add_argument("--path_checkpoint", type=str, default="./checkpoint/")
-    parser.add_argument("--name_model", type=str, default="510_first_token")
+    # parser.add_argument("--path_checkpoint", type=str, default="./checkpoint/")
+    parser.add_argument("--name_model", type=str, default="200_first_token")
     parser.add_argument("--test_size", type=int, default=0.2)
     parser.add_argument("--max_len", type=int, default=64)
     parser.add_argument("--n_class", type=int, default=4)
-    parser.add_argument("--fig_root", type=str, default="./data")
+    parser.add_argument("--root_path", type=str, default="./")
     args = parser.parse_args()
     main(args)
