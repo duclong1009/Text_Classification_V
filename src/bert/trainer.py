@@ -47,3 +47,42 @@ def eval_fn(data_loader, model, device):
             fin_targets.extend(targets.cpu().detach().numpy().tolist())
             fin_outputs.extend(output.cpu().detach().numpy().tolist())
     return fin_outputs, fin_targets
+
+
+def train_gru_fn(data_loader, model, optimizer, loss_fn, device):
+    model.train()
+    train_loss = 0
+    for bi, d in tqdm(enumerate(data_loader), total=len(data_loader)):
+        input = {
+            "input_ids": d[0].to(device),
+            "attention_mask": d[1].to(device),
+            "token_type_ids": d[2].to(device),
+        }
+        label = d[-1].to(device)
+        optimizer.zero_grad()
+        outputs = model(input)
+        loss = loss_fn(outputs, label.long())
+        loss.backward()
+        optimizer.step()
+        train_loss += loss.item()
+    return train_loss / len(data_loader)
+
+
+def eval_gru_fn(data_loader, model, loss_fn, device):
+    model.eval()
+    fin_targets = []
+    fin_outputs = []
+    with torch.no_grad():
+        for bi, d in tqdm(enumerate(data_loader), total=len(data_loader)):
+            input = {
+                "input_ids": d[0].to(device),
+                "attention_mask": d[1].to(device),
+                "token_type_ids": d[2].to(device),
+            }
+            targets = d[-1]
+            d[-1].to(device)
+            outputs = model(input)
+            output = torch.argmax(outputs, dim=-1)
+            fin_targets.extend(targets.cpu().detach().numpy().tolist())
+            fin_outputs.extend(output.cpu().detach().numpy().tolist())
+    return fin_outputs, fin_targets

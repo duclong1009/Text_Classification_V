@@ -1,4 +1,3 @@
-import torch
 import torch.nn as nn
 from transformers import AutoConfig, AutoModel
 
@@ -25,7 +24,8 @@ class DecoderModel(nn.Module):
             token_type_ids=content_token_type_ids,
         )
         output = out.last_hidden_state
-        output = torch.mean(output, dim=1)
+        # output = torch.mean(output, dim=1)
+        output = output[:, 0, :]
         out = self.bert_drop(output)
         out = self.fc(out)
         return self.softmax(out)
@@ -48,6 +48,7 @@ class GRU_BERT(nn.Module):
             bidirectional=True,
             batch_first=True,
         )
+
         self.fc = nn.Linear(in_features=hid_gru_dim * 2, out_features=n_classes)
         self.softmax = nn.Softmax(dim=-1)
 

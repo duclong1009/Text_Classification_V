@@ -3,15 +3,15 @@ import argparse
 import numpy as np
 import pandas as pd
 import torch
+from dataset import BertDataset
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
 
-from dataset import BertDataset
-from models import DecoderModel
-from tokenizer import VnCoreTokenizer
-from trainer import eval_fn
-from utils import load_model
+from src.bert.models import DecoderModel
+from src.bert.trainer import eval_fn
+from src.dataset.dataset import VnCoreTokenizer
+from src.utils.utils import load_model
 
 
 def main(arg):
