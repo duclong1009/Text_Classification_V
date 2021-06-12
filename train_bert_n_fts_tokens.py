@@ -8,11 +8,11 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
 
-from dataset import BertDataset
-from models import DecoderModel
-from tokenizer import VnCoreTokenizer
-from trainer import eval_fn, train_fn
-from utils import EarlyStopping, seed_all
+from src.bert.models import DecoderModel
+from src.bert.tokenizer import VnCoreTokenizer
+from src.bert.trainer import eval_fn, train_fn
+from src.dataset.dataset import BertDataset
+from src.utils.utils import EarlyStopping, seed_all
 
 
 def main(arg):
