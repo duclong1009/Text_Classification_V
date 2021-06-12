@@ -9,9 +9,8 @@ from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
 
 from src.bert.models import DecoderModel
-from src.bert.tokenizer import VnCoreTokenizer
 from src.bert.trainer import eval_fn, train_fn
-from src.dataset.dataset import BertDataset
+from src.dataset.dataset import BertDataset, VnCoreTokenizer
 from src.utils.utils import EarlyStopping, seed_all
 
 
@@ -49,7 +48,7 @@ def main(arg):
         es(accuracy, model, optimizer)
 
     test_df = pd.read_excel(arg.fig_root + "data/news.xlsx")
-#     test_df, _ = train_test_split(test_df, train_size=0.005)
+    #     test_df, _ = train_test_split(test_df, train_size=0.005)
     test_dataset = BertDataset(test_df, tokenizer, arg.max_len, vncore_tokenizer)
     test_dataloder = DataLoader(test_dataset, arg.batch_size, shuffle=False)
     output_test, target_test = eval_fn(test_dataloder, model, device)
