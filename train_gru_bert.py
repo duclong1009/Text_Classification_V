@@ -10,10 +10,12 @@ from transformers import AutoTokenizer
 
 from src.bert.models import GRU_BERT
 from src.bert.trainer import eval_gru_fn, train_gru_fn
-from src.dataset.dataset import *
+from src.dataset.dataset import GB_Dataset, VnCoreTokenizer
 from src.utils.utils import EarlyStopping, seed_all
 
 
+# val_dataset = GB_Dataset(val_df, vncore_tokenizer, tokenizer, 40, 200, 50)
+# val_dataloader = DataLoader(val_dataset, batch_size=3)
 def main(arg):
     seed_all(arg.seed)
     vncore_tokenizer = VnCoreTokenizer(arg.vncore_tokenizer)
@@ -22,19 +24,26 @@ def main(arg):
     train_df, val_df = train_test_split(
         df, test_size=arg.test_size, stratify=df["label"]
     )
-    x_train, y_train, num_segments_train = load_segments(
-        train_df, vncore_tokenizer, arg.size_segment, arg.size_shift
+    train_dataset = GB_Dataset(
+        train_df,
+        vncore_tokenizer,
+        tokenizer,
+        arg.max_segments,
+        arg.size_segment,
+        arg.size_shift,
     )
-    x_val, y_val, num_segments_val = load_segments(
-        val_df, vncore_tokenizer, arg.size_segment, arg.size_shift
+    val_dataset = GB_Dataset(
+        val_df,
+        vncore_tokenizer,
+        tokenizer,
+        arg.max_segments,
+        arg.size_segment,
+        arg.size_shift,
     )
-    train_dataset = generate_dataset(x_train, y_train, num_segments_train, tokenizer)
-    val_dataset = generate_dataset(x_val, y_val, num_segments_val, tokenizer)
     train_dataloader = DataLoader(
         train_dataset, batch_size=arg.batch_size, shuffle=True
     )
     val_dataloader = DataLoader(val_dataset, batch_size=arg.batch_size, shuffle=False)
-
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = GRU_BERT(arg.bert_model, arg.n_class, 0.3, arg.hid_gru_dim).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=arg.lr)
@@ -75,6 +84,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--vncore_tokenizer", type=str, default="./vncorenlp/VnCoreNLP-1.1.1.jar"
     )
+    parser.add_argument("--max_segments", type=int, default=40)
     parser.add_argument("--hid_gru_dim", type=int, default=200)
     parser.add_argument("--name_model", type=str, default="gru_bert")
     parser.add_argument("--test_size", type=int, default=0.2)
