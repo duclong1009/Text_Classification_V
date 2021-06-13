@@ -25,7 +25,7 @@ class DecoderModel(nn.Module):
         )
         output = out.last_hidden_state
         # output = torch.mean(output, dim=1)
-        output = output[:, 0, :]
+        output = torch.cat([output[2][-i][:, 0, :] for i in range(4)], axis=-1)
         out = self.bert_drop(output)
         out = self.fc(out)
         return self.softmax(out)

@@ -144,7 +144,7 @@ class GB_Dataset(Dataset):
         if n_segment > self.max_segments:
             n_segment = self.max_segments
         if n_segment > 1:
-            for i in range(0, n_tokens, length_):
+            for i in range(n_segment):
                 j = min(i + self.size_segment, n_tokens)
                 list_segment.append(" ".join(token[i:j]))
         else:
