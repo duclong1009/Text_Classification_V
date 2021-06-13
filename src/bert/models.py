@@ -12,7 +12,7 @@ class DecoderModel(nn.Module):
         )
         self.bert = AutoModel.from_pretrained(bert_model, config=config)
         self.bert_drop = nn.Dropout(dropout)
-        self.fc = nn.Linear(config.hidden_size, n_classes)
+        self.fc = nn.Linear(config.hidden_size * 4, n_classes)
         self.softmax = nn.Softmax()
 
     def forward(
