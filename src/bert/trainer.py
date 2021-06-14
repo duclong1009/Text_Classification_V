@@ -75,12 +75,11 @@ def eval_gru_fn(data_loader, model, loss_fn, device):
     with torch.no_grad():
         for bi, d in tqdm(enumerate(data_loader), total=len(data_loader)):
             input = {
-                "input_ids": d[0].to(device),
-                "attention_mask": d[1].to(device),
-                "token_type_ids": d[2].to(device),
+                "input_ids": d["content_input_ids"].to(device),
+                "attention_mask": d["content_attention_mask"].to(device),
+                "token_type_ids": d["content_token_type_ids"].to(device),
             }
-            targets = d[-1]
-            d[-1].to(device)
+            targets = d["label"].to(device)
             outputs = model(input)
             output = torch.argmax(outputs, dim=-1)
             fin_targets.extend(targets.cpu().detach().numpy().tolist())

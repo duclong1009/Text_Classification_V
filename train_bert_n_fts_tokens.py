@@ -11,7 +11,7 @@ from transformers import AutoTokenizer
 from src.bert.models import DecoderModel
 from src.bert.trainer import eval_fn, train_fn
 from src.dataset.dataset import BertDataset, VnCoreTokenizer
-from src.utils.utils import EarlyStopping, seed_all
+from src.utils.utils import EarlyStopping, load_model, seed_all
 
 
 def main(arg):
@@ -33,7 +33,8 @@ def main(arg):
     model = DecoderModel(bert_model, arg.n_class, 0.3).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=arg.lr)
     CE_Loss = nn.CrossEntropyLoss()
-    es = EarlyStopping(3, path=(arg.root_path + arg.name_model))
+    path_save = arg.root_path + arg.name_model + ".pth.rar"
+    es = EarlyStopping(3, path=(path_save))
 
     for i in range(arg.epochs):
         loss = train_fn(train_dataloader, model, optimizer, CE_Loss, device)
@@ -46,7 +47,8 @@ def main(arg):
         )
         es(accuracy, model, optimizer)
 
-    test_df = pd.read_excel(arg.fig_root + "data/news.xlsx")
+    load_model(model, optimizer, torch.load(path_save))
+    test_df = pd.read_excel(arg.root_path + "data/news.xlsx")
     test_dataset = BertDataset(test_df, tokenizer, arg.max_len, vncore_tokenizer)
     test_dataloder = DataLoader(test_dataset, arg.batch_size, shuffle=False)
     output_test, target_test = eval_fn(test_dataloder, model, device)

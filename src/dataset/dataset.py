@@ -161,6 +161,7 @@ class GB_Dataset(Dataset):
             max_length=self.size_segment,
             return_attention_mask=True,  # 0: padded tokens, 1: not padded tokens; taking into account the sequence length
             return_tensors="pt",
+            truncation=True,
         )
         input_ids = torch.zeros(
             (self.max_segments, self.size_segment), dtype=tokens["input_ids"].dtype

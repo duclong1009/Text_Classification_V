@@ -11,7 +11,7 @@ from transformers import AutoTokenizer
 from src.bert.models import GRU_BERT
 from src.bert.trainer import eval_gru_fn, train_gru_fn
 from src.dataset.dataset import GB_Dataset, VnCoreTokenizer
-from src.utils.utils import EarlyStopping, seed_all
+from src.utils.utils import EarlyStopping, load_model, seed_all
 
 
 # val_dataset = GB_Dataset(val_df, vncore_tokenizer, tokenizer, 40, 200, 50)
@@ -48,10 +48,11 @@ def main(arg):
     model = GRU_BERT(arg.bert_model, arg.n_class, 0.3, arg.hid_gru_dim).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=arg.lr)
     CE_Loss = nn.CrossEntropyLoss()
-    es = EarlyStopping(3, path=(arg.root_path + arg.name_model))
+    path_save = arg.root_path + arg.name_model + ".pth.rar"
+    es = EarlyStopping(3, path=(path_save))
     for i in range(arg.epochs):
         loss = train_gru_fn(train_dataloader, model, optimizer, CE_Loss, device)
-        output, target = eval_gru_fn(val_dataloader, model, device)
+        output, target = eval_gru_fn(val_dataloader, model, CE_Loss, device)
         accuracy = sum(np.array(output) == np.array(target)) / len(target)
         print(
             "epochs {} / {}  train_loss : {}  val_acc : {}".format(
@@ -60,13 +61,18 @@ def main(arg):
         )
         es(accuracy, model, optimizer)
 
-    test_df = pd.read_excel(arg.fig_root + "data/news.xlsx")
-    x_test, y_test, num_segments_test = load_segments(
-        test_df, vncore_tokenizer, arg.size_segment, arg.size_shift
+    load_model(model, optimizer, torch.load(path_save))
+    test_df = pd.read_excel(arg.root_path + "data/news.xlsx")
+    test_dataset = GB_Dataset(
+        test_df,
+        vncore_tokenizer,
+        tokenizer,
+        arg.max_segments,
+        arg.size_segment,
+        arg.size_shift,
     )
-    test_dataset = generate_dataset(x_test, y_test, num_segments_test, tokenizer)
     test_dataloader = DataLoader(test_dataset, batch_size=arg.batch_size, shuffle=False)
-    output_test, target_test = eval_fn(test_dataloader, model, device)
+    output_test, target_test = eval_gru_fn(test_dataloader, model, CE_Loss, device)
     test_acc = sum(np.array(output_test) == np.array(target_test)) / len(target_test)
     print("Accuracy test: ", test_acc)
 
