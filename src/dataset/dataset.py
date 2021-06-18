@@ -9,7 +9,7 @@ from transformers import AutoTokenizer
 from vncorenlp import VnCoreNLP
 
 
-class BertDataset(Dataset):
+class TailTokenDataset(Dataset):
     def __init__(
         self,
         df: pd.DataFrame,
@@ -17,7 +17,7 @@ class BertDataset(Dataset):
         max_len: int,
         corevn_tokenizer,
     ):
-        super(BertDataset, self).__init__()
+        super(LastTokenDataset, self).__init__()
         """
       Args:
         df(pd.DataFrame): DataFrame for all arguments
@@ -35,7 +35,6 @@ class BertDataset(Dataset):
 
     def __getitem__(self, idx):
         content = self.content[idx]
-        content = self.corevn_tokenizer.tokenize(content)
         label = self.label[idx]
         (
             content_input_ids,
@@ -55,6 +54,11 @@ class BertDataset(Dataset):
         return sample
 
     def _tokenize(self, text: str, max_len: int):
+        text = self.corevn_tokenizer.tokenize(text)
+        list_text = text.split(" ")
+        if len(list_text) > max_len:
+            list_text = list_text[-max_len:]
+        text = " ".join(list_text)
         inputs = self.tokenizer.encode_plus(
             text,
             # add_special_tokens=True,
@@ -76,6 +80,7 @@ class VnCoreTokenizer:
 
     def tokenize(self, text: str, return_sentences=False) -> str:
         sentences = self.rdrsegmenter.tokenize(text)
+        # print(sentence)
         if return_sentences:
             return [" ".join(sentence) for sentence in sentences]
         output = ""
@@ -180,6 +185,12 @@ class GB_Dataset(Dataset):
             token_type_ids[n:] = tokens["token_type_ids"][n]
         return input_ids, attention_mask, token_type_ids
 
+
+if __name__ == "__main__":
+    path = "vncorenlp/VnCoreNLP-1.1.1.jar"
+    vncore_tokenizer = VnCoreNLP(path, annotators="wseg", max_heap_size="-Xmx500m")
+    t = "Tôi tên là Nguyễn Đức Long. Tôi là sinh viên năm ba."
+    print(vncore_tokenizer.tokenize(t))
 
 # if __name__ == "__main__":
 #     # from src.bert.models import GRU_BERT

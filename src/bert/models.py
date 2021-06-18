@@ -86,7 +86,7 @@ class GRU_BERT(nn.Module):
 
 class FC_BERT(nn.Module):
     def __init__(self, bert_model, n_classes, dropout, n_segments):
-        super(GRU_BERT, self).__init__()
+        super(FC_BERT, self).__init__()
         config = AutoConfig.from_pretrained(
             bert_model,
             from_tf=False,
