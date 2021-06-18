@@ -4,7 +4,7 @@ from transformers import AutoConfig, AutoModel
 
 
 class DecoderModel(nn.Module):
-    def __init__(self, bert_model, n_classes, dropout):
+    def __init__(self, bert_model="vinai/phobert-base", n_classes=4, dropout=0.3):
         super().__init__()
         config = AutoConfig.from_pretrained(
             bert_model,
@@ -15,9 +15,19 @@ class DecoderModel(nn.Module):
         self.bert_drop = nn.Dropout(dropout)
         self.fc = nn.Linear(config.hidden_size * 4, n_classes)
         self.softmax = nn.Softmax()
+        self._init_weights(self.fc)
+
+    def _init_weights(self, module):
+        if isinstance(module, nn.Linear):
+            module.weight.data.normal_(mean=0.0, std=self.config.initializer_range)
+            if module.bias is not None:
+                module.bias.data.zero_()
 
     def forward(
-        self, content_input_ids, content_attention_mask, content_token_type_ids
+        self,
+        content_input_ids=None,
+        content_attention_mask=None,
+        content_token_type_ids=None,
     ):
         output = self.bert(
             content_input_ids,
@@ -33,7 +43,9 @@ class DecoderModel(nn.Module):
 
 
 class GRU_BERT(nn.Module):
-    def __init__(self, bert_model, n_classes, dropout, hid_gru_dim):
+    def __init__(
+        self, bert_model="vinai/phobert-base", n_classes=4, dropout=0.3, hid_gru_dim=128
+    ):
         super(GRU_BERT, self).__init__()
         config = AutoConfig.from_pretrained(
             bert_model,
@@ -52,8 +64,15 @@ class GRU_BERT(nn.Module):
 
         self.fc = nn.Linear(in_features=hid_gru_dim * 2, out_features=n_classes)
         self.softmax = nn.Softmax(dim=-1)
+        self._init_weights(self.fc)
 
-    def forward(self, x):
+    def _init_weights(self, module):
+        if isinstance(module, nn.Linear):
+            module.weight.data.normal_(mean=0.0, std=self.config.initializer_range)
+            if module.bias is not None:
+                module.bias.data.zero_()
+
+    def forward(self, x=None):
         content_input_ids, content_attention_mask, content_token_type_ids = (
             x["input_ids"],
             x["attention_mask"],
@@ -85,7 +104,9 @@ class GRU_BERT(nn.Module):
 
 
 class FC_BERT(nn.Module):
-    def __init__(self, bert_model, n_classes, dropout, n_segments):
+    def __init__(
+        self, bert_model="vinai/phobert-base", n_classes=4, dropout=0.3, n_segments=10
+    ):
         super(FC_BERT, self).__init__()
         config = AutoConfig.from_pretrained(
             bert_model,
@@ -99,8 +120,15 @@ class FC_BERT(nn.Module):
             in_features=config.hidden_size * n_segments, out_features=n_classes
         )
         self.softmax = nn.Softmax(dim=-1)
+        self._init_weights(self.fc)
 
-    def forward(self, x):
+    def _init_weights(self, module):
+        if isinstance(module, nn.Linear):
+            module.weight.data.normal_(mean=0.0, std=self.config.initializer_range)
+            if module.bias is not None:
+                module.bias.data.zero_()
+
+    def forward(self, x=None):
         content_input_ids, content_attention_mask, content_token_type_ids = (
             x["input_ids"],
             x["attention_mask"],

@@ -17,7 +17,7 @@ class TailTokenDataset(Dataset):
         max_len: int,
         corevn_tokenizer,
     ):
-        super(LastTokenDataset, self).__init__()
+        super(TailTokenDataset, self).__init__()
         """
       Args:
         df(pd.DataFrame): DataFrame for all arguments

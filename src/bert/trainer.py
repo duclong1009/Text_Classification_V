@@ -23,7 +23,7 @@ def train_fn(data_loader, model, optimizer, loss_fn, device):
     return train_loss / len(data_loader)
 
 
-def eval_fn(data_loader, model, device):
+def eval_fn(data_loader, model, device, print_pred=False):
     model.eval()
     fin_targets = []
     fin_outputs = []
@@ -44,6 +44,8 @@ def eval_fn(data_loader, model, device):
                 content_token_type_ids=token_type_ids,
             )
             output = torch.argmax(outputs, dim=-1)
+            if print_pred:
+                print(output, targets)
             fin_targets.extend(targets.cpu().detach().numpy().tolist())
             fin_outputs.extend(output.cpu().detach().numpy().tolist())
     return fin_outputs, fin_targets
@@ -68,7 +70,7 @@ def train_gru_fn(data_loader, model, optimizer, loss_fn, device):
     return train_loss / len(data_loader)
 
 
-def eval_gru_fn(data_loader, model, loss_fn, device):
+def eval_gru_fn(data_loader, model, loss_fn, device, print_pred=False):
     model.eval()
     fin_targets = []
     fin_outputs = []
@@ -82,6 +84,8 @@ def eval_gru_fn(data_loader, model, loss_fn, device):
             targets = d["label"].to(device)
             outputs = model(input)
             output = torch.argmax(outputs, dim=-1)
+            if print_pred:
+                print(output, targets)
             fin_targets.extend(targets.cpu().detach().numpy().tolist())
             fin_outputs.extend(output.cpu().detach().numpy().tolist())
     return fin_outputs, fin_targets
