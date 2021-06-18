@@ -91,7 +91,7 @@ if __name__ == "__main__":
     parser.add_argument("--max_segments", type=int, default=40)
     parser.add_argument("--hid_gru_dim", type=int, default=200)
     parser.add_argument("--name_model", type=str, default="gru_bert")
-    parser.add_argument("--test_size", type=int, default=0.2)
+    parser.add_argument("--test_size", type=float, default=0.2)
     parser.add_argument("--n_class", type=int, default=4)
     parser.add_argument("--root_path", type=str, default="./")
     args = parser.parse_args()

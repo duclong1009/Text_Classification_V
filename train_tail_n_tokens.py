@@ -68,7 +68,7 @@ if __name__ == "__main__":
         "--vncore_tokenizer", type=str, default="./vncorenlp/VnCoreNLP-1.1.1.jar"
     )
     parser.add_argument("--name_model", type=str, default="200_first_token")
-    parser.add_argument("--test_size", type=int, default=0.2)
+    parser.add_argument("--test_size", type=float, default=0.2)
     parser.add_argument("--max_len", type=int, default=64)
     parser.add_argument("--n_class", type=int, default=4)
     parser.add_argument("--root_path", type=str, default="./")
