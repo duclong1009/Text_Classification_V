@@ -1,7 +1,7 @@
 import math
+import random
 import re
 
-import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader, Dataset
@@ -184,11 +184,11 @@ class RandomDataset(Dataset):
         text = self.corevn_tokenizer.tokenize(text)
         list_text = text.split(" ")
         length = len(list_text)
-        index = np.random.randint(0, length)
+        index = random.randint(0, length)
         if (length - index) > max_len:
             text = " ".join(list_text[index : index + max_len])
         else:
-            text = " ".join(list_text[index, :])
+            text = " ".join(list_text[index:])
         inputs = self.tokenizer.encode_plus(
             text,
             add_special_tokens=True,

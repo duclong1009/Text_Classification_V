@@ -35,7 +35,7 @@ def main(arg):
     print(count_parameters(model))
     optimizer = torch.optim.AdamW(params, lr=arg.lr)
     CE_Loss = nn.CrossEntropyLoss()
-    path_save = arg.root_path + arg.name_model + ".pth.rar"
+    path_save = arg.path_save
     es = EarlyStopping(3, path=(path_save))
 
     for i in range(arg.epochs):
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--vncore_tokenizer", type=str, default="./vncorenlp/VnCoreNLP-1.1.1.jar"
     )
-    parser.add_argument("--name_model", type=str, default="200_first_token")
+    parser.add_argument("--path_save", type=str, default="./200_first_token")
     parser.add_argument("--test_size", type=float, default=0.2)
     parser.add_argument("--max_len", type=int, default=64)
     parser.add_argument("--n_class", type=int, default=4)
