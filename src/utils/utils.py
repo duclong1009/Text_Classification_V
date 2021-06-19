@@ -43,7 +43,7 @@ class EarlyStopping:
         self.path = path
         self.trace_func = trace_func
 
-    def __call__(self, val_loss, model, optimizer):
+    def __call__(self, val_loss, model):
 
         score = val_loss
 
@@ -62,16 +62,13 @@ class EarlyStopping:
             self.save_checkpoint(val_loss, model, optimizer)
             self.counter = 0
 
-    def save_checkpoint(self, val_loss, model, optimizer):
+    def save_checkpoint(self, val_loss, model):
         """Saves model when validation loss decrease."""
         if self.verbose:
             self.trace_func(
                 f"Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ..."
             )
-        checkpoints = {
-            "model_dict": model.state_dict(),
-            "optimizer": optimizer.state_dict(),
-        }
+        checkpoints = {"model_dict": model.state_dict()}
         torch.save(checkpoints, self.path)
         self.val_loss_min = val_loss
 
@@ -79,7 +76,6 @@ class EarlyStopping:
 def load_model(model, optim, checkpoints):
     print("Loading model")
     model.load_state_dict(checkpoints["model_dict"])
-    optim.load_state_dict(checkpoints["optimizer"])
 
 
 def count_parameters(model) -> int:

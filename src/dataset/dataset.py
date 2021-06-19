@@ -1,6 +1,7 @@
 import math
 import re
 
+import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader, Dataset
@@ -61,7 +62,136 @@ class TailTokenDataset(Dataset):
         text = " ".join(list_text)
         inputs = self.tokenizer.encode_plus(
             text,
-            # add_special_tokens=True,
+            add_special_tokens=True,
+            max_length=max_len,
+            padding="max_length",
+            return_token_type_ids=True,
+            truncation=True,
+        )
+        input_ids = inputs["input_ids"]
+        attention_mask = inputs["attention_mask"]
+        token_type_ids = inputs["token_type_ids"]
+
+        return input_ids, attention_mask, token_type_ids
+
+
+class BertDataset(Dataset):
+    def __init__(
+        self,
+        df: pd.DataFrame,
+        tokenizer: AutoTokenizer,
+        max_len: int,
+        corevn_tokenizer,
+    ):
+        super(BertDataset, self).__init__()
+        """
+      Args:
+        df(pd.DataFrame): DataFrame for all arguments
+        tokenizer : Pretrained PhoBert
+    """
+        self.corevn_tokenizer = corevn_tokenizer
+        self.max_len = max_len
+        self.df = df.copy()
+        self.content = df["content"].values
+        self.label = df["label"].values
+        self.tokenizer = tokenizer
+
+    def __len__(self):
+        return len(self.df)
+
+    def __getitem__(self, idx):
+        content = self.content[idx]
+        label = self.label[idx]
+        (
+            content_input_ids,
+            content_attention_mask,
+            content_token_type_ids,
+        ) = self._tokenize(text=content, max_len=self.max_len)
+        sample = {
+            "content_input_ids": torch.tensor(content_input_ids, dtype=torch.long),
+            "content_attention_mask": torch.tensor(
+                content_attention_mask, dtype=torch.long
+            ),
+            "content_token_type_ids": torch.tensor(
+                content_token_type_ids, dtype=torch.long
+            ),
+            "label": torch.tensor(label, dtype=torch.float),
+        }
+        return sample
+
+    def _tokenize(self, text: str, max_len: int):
+        text = self.corevn_tokenizer.tokenize(text)
+        inputs = self.tokenizer.encode_plus(
+            text,
+            add_special_tokens=True,
+            max_length=max_len,
+            padding="max_length",
+            return_token_type_ids=True,
+            truncation=True,
+        )
+        input_ids = inputs["input_ids"]
+        attention_mask = inputs["attention_mask"]
+        token_type_ids = inputs["token_type_ids"]
+
+        return input_ids, attention_mask, token_type_ids
+
+
+class RandomDataset(Dataset):
+    def __init__(
+        self,
+        df: pd.DataFrame,
+        tokenizer: AutoTokenizer,
+        max_len: int,
+        corevn_tokenizer,
+    ):
+        super(RandomDataset, self).__init__()
+        """
+      Args:
+        df(pd.DataFrame): DataFrame for all arguments
+        tokenizer : Pretrained PhoBert
+    """
+        self.corevn_tokenizer = corevn_tokenizer
+        self.max_len = max_len
+        self.df = df.copy()
+        self.content = df["content"].values
+        self.label = df["label"].values
+        self.tokenizer = tokenizer
+
+    def __len__(self):
+        return len(self.df)
+
+    def __getitem__(self, idx):
+        content = self.content[idx]
+        label = self.label[idx]
+        (
+            content_input_ids,
+            content_attention_mask,
+            content_token_type_ids,
+        ) = self._tokenize(text=content, max_len=self.max_len)
+        sample = {
+            "content_input_ids": torch.tensor(content_input_ids, dtype=torch.long),
+            "content_attention_mask": torch.tensor(
+                content_attention_mask, dtype=torch.long
+            ),
+            "content_token_type_ids": torch.tensor(
+                content_token_type_ids, dtype=torch.long
+            ),
+            "label": torch.tensor(label, dtype=torch.float),
+        }
+        return sample
+
+    def _tokenize(self, text: str, max_len: int):
+        text = self.corevn_tokenizer.tokenize(text)
+        list_text = text.split(" ")
+        length = len(list_text)
+        index = np.random.randint(0, length)
+        if (length - index) > max_len:
+            text = " ".join(list_text[index : index + max_len])
+        else:
+            text = " ".join(list_text[index, :])
+        inputs = self.tokenizer.encode_plus(
+            text,
+            add_special_tokens=True,
             max_length=max_len,
             padding="max_length",
             return_token_type_ids=True,

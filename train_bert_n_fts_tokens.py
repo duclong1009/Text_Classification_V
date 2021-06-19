@@ -11,7 +11,7 @@ from transformers import AutoTokenizer
 from src.bert.models import DecoderModel
 from src.bert.trainer import eval_fn, train_fn
 from src.dataset.dataset import BertDataset, VnCoreTokenizer
-from src.utils.utils import EarlyStopping, load_model, seed_all
+from src.utils.utils import *
 
 
 def main(arg):
@@ -31,11 +31,12 @@ def main(arg):
     val_dataloder = DataLoader(val_dataset, batch_size=arg.batch_size, shuffle=False)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = DecoderModel(bert_model, arg.n_class, 0.3).to(device)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=arg.lr)
+    params = [params for params in model.parameters() if params.requires_grad == True]
+    print(count_parameters(model))
+    optimizer = torch.optim.AdamW(params, lr=arg.lr)
     CE_Loss = nn.CrossEntropyLoss()
     path_save = arg.root_path + arg.name_model + ".pth.rar"
     es = EarlyStopping(3, path=(path_save))
-
     for i in range(arg.epochs):
         loss = train_fn(train_dataloader, model, optimizer, CE_Loss, device)
         output, target = eval_fn(val_dataloder, model, device)
@@ -45,9 +46,9 @@ def main(arg):
                 i + 1, arg.epochs, loss, accuracy
             )
         )
-        es(accuracy, model, optimizer)
+        es(accuracy, model)
 
-    load_model(model, optimizer, torch.load(path_save))
+    load_model(model, torch.load(path_save))
     test_df = pd.read_excel(arg.root_path + "data/news.xlsx")
     test_dataset = BertDataset(test_df, tokenizer, arg.max_len, vncore_tokenizer)
     test_dataloder = DataLoader(test_dataset, arg.batch_size, shuffle=False)

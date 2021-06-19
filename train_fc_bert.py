@@ -11,7 +11,7 @@ from transformers import AutoTokenizer
 from src.bert.models import FC_BERT
 from src.bert.trainer import eval_gru_fn, train_gru_fn
 from src.dataset.dataset import GB_Dataset, VnCoreTokenizer
-from src.utils.utils import EarlyStopping, load_model, seed_all
+from src.utils.utils import *
 
 
 def main(arg):
@@ -46,7 +46,9 @@ def main(arg):
     model = FC_BERT(
         arg.bert_model, arg.n_class, 0.3, arg.hid_gru_dim, arg.max_segments
     ).to(device)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=arg.lr)
+    params = [params for params in model.parameters() if params.requires_grad == True]
+    print(count_parameters(model))
+    optimizer = torch.optim.AdamW(params, lr=arg.lr)
     CE_Loss = nn.CrossEntropyLoss()
     path_save = arg.root_path + arg.name_model + ".pth.rar"
     es = EarlyStopping(3, path=(path_save))
@@ -59,9 +61,9 @@ def main(arg):
                 i + 1, arg.epochs, loss, accuracy
             )
         )
-        es(accuracy, model, optimizer)
+        es(accuracy, model)
 
-    load_model(model, optimizer, torch.load(path_save))
+    load_model(model, torch.load(path_save))
     test_df = pd.read_excel(arg.root_path + "data/news.xlsx")
     test_dataset = GB_Dataset(
         test_df,

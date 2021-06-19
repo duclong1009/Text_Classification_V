@@ -15,13 +15,15 @@ class DecoderModel(nn.Module):
         self.bert_drop = nn.Dropout(dropout)
         self.fc = nn.Linear(config.hidden_size * 4, n_classes)
         self.softmax = nn.Softmax()
-        self._init_weights(self.fc)
+        for param in self.bert.parameters():
+            param.requires_grad = False
+        self.weight_init(self.fc)
 
-    def _init_weights(self, module):
-        if isinstance(module, nn.Linear):
-            module.weight.data.normal_(mean=0.0, std=self.config.initializer_range)
-            if module.bias is not None:
-                module.bias.data.zero_()
+    def weight_init(self, m):
+        if isinstance(m, nn.Linear):
+            torch.nn.init.xavier_uniform_(m.weight.data)
+        if m.bias is not None:
+            m.bias.data.fill_(0.0)
 
     def forward(
         self,
@@ -64,13 +66,15 @@ class GRU_BERT(nn.Module):
 
         self.fc = nn.Linear(in_features=hid_gru_dim * 2, out_features=n_classes)
         self.softmax = nn.Softmax(dim=-1)
-        self._init_weights(self.fc)
+        self.weight_init(self.fc)
+        for param in self.bert.parameters():
+            param.requires_grad = False
 
-    def _init_weights(self, module):
-        if isinstance(module, nn.Linear):
-            module.weight.data.normal_(mean=0.0, std=self.config.initializer_range)
-            if module.bias is not None:
-                module.bias.data.zero_()
+    def weight_init(self, m):
+        if isinstance(m, nn.Linear):
+            torch.nn.init.xavier_uniform_(m.weight.data)
+        if m.bias is not None:
+            m.bias.data.fill_(0.0)
 
     def forward(self, x=None):
         content_input_ids, content_attention_mask, content_token_type_ids = (
@@ -120,13 +124,15 @@ class FC_BERT(nn.Module):
             in_features=config.hidden_size * n_segments, out_features=n_classes
         )
         self.softmax = nn.Softmax(dim=-1)
-        self._init_weights(self.fc)
+        for param in self.bert.parameters():
+            param.requires_grad = False
+        self.weight_init(self.fc)
 
-    def _init_weights(self, module):
-        if isinstance(module, nn.Linear):
-            module.weight.data.normal_(mean=0.0, std=self.config.initializer_range)
-            if module.bias is not None:
-                module.bias.data.zero_()
+    def weight_init(self, m):
+        if isinstance(m, nn.Linear):
+            torch.nn.init.xavier_uniform_(m.weight.data)
+        if m.bias is not None:
+            m.bias.data.fill_(0.0)
 
     def forward(self, x=None):
         content_input_ids, content_attention_mask, content_token_type_ids = (
