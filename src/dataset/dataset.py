@@ -259,14 +259,10 @@ class GB_Dataset(Dataset):
             content_token_type_ids,
         ) = self.generate_dataset(list_segment, n_segment)
         sample = {
-            "content_input_ids": torch.tensor(content_input_ids, dtype=torch.long),
-            "content_attention_mask": torch.tensor(
-                content_attention_mask, dtype=torch.long
-            ),
-            "content_token_type_ids": torch.tensor(
-                content_token_type_ids, dtype=torch.long
-            ),
-            "label": torch.tensor(label, dtype=torch.float),
+            "content_input_ids": content_input_ids,
+            "content_attention_mask": content_attention_mask,
+            "content_token_type_ids": content_token_type_ids,
+            "label": label,
         }
         return sample
 

@@ -73,7 +73,7 @@ class EarlyStopping:
         self.val_loss_min = val_loss
 
 
-def load_model(model, optim, checkpoints):
+def load_model(model, checkpoints):
     print("Loading model")
     model.load_state_dict(checkpoints["model_dict"])
 
