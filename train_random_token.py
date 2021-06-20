@@ -23,6 +23,10 @@ def main(arg):
     train_df, val_df = train_test_split(
         df, test_size=arg.test_size, stratify=df["label"]
     )
+    if arg.upsampling:
+        a = train_df[train_df["label"] != 3]
+        temp = pd.concat((a, a, a, train_df[train_df["label"] == 3])).reset_index()
+        train_df = temp[["content", "label"]]
     train_dataset = RandomDataset(train_df, tokenizer, arg.max_len, vncore_tokenizer)
     val_dataset = RandomDataset(val_df, tokenizer, arg.max_len, vncore_tokenizer)
     train_dataloader = DataLoader(
@@ -73,5 +77,6 @@ if __name__ == "__main__":
     parser.add_argument("--max_len", type=int, default=64)
     parser.add_argument("--n_class", type=int, default=4)
     parser.add_argument("--root_path", type=str, default="./")
+    parser.add_argument("--upsampling", type=bool, default=False)
     args = parser.parse_args()
     main(args)
