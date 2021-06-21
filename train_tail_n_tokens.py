@@ -19,7 +19,7 @@ def main(arg):
     vncore_tokenizer = VnCoreTokenizer(arg.vncore_tokenizer)
     tokenizer = AutoTokenizer.from_pretrained(arg.bert_tokenizer, use_fast=False)
     bert_model = arg.bert_model
-    df = pd.read_excel(arg.root_path + "data/news.xlsx")
+    df = pd.read_excel(arg.root_path + "data/train.xlsx")
     train_df, val_df = train_test_split(
         df, test_size=arg.test_size, stratify=df["label"]
     )
@@ -55,7 +55,7 @@ def main(arg):
 
     load_model(model, torch.load(path_save))
     test_df = pd.read_excel(arg.root_path + "data/news.xlsx")
-    test_dataset = BertDataset(test_df, tokenizer, arg.max_len, vncore_tokenizer)
+    test_dataset = TailTokenDataset(test_df, tokenizer, arg.max_len, vncore_tokenizer)
     test_dataloder = DataLoader(test_dataset, arg.batch_size, shuffle=False)
     output_test, target_test = eval_fn(test_dataloder, model, device)
     test_acc = sum(np.array(output_test) == np.array(target_test)) / len(target_test)
