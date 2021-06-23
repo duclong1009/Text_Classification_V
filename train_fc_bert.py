@@ -47,9 +47,7 @@ def main(arg):
     )
     val_dataloader = DataLoader(val_dataset, batch_size=arg.batch_size, shuffle=False)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = FC_BERT(
-        arg.bert_model, arg.n_class, 0.3, arg.hid_gru_dim, arg.max_segments
-    ).to(device)
+    model = FC_BERT(arg.bert_model, arg.n_class, 0.3, arg.max_segments).to(device)
     params = [params for params in model.parameters() if params.requires_grad == True]
     print(count_parameters(model))
     optimizer = torch.optim.AdamW(params, lr=arg.lr)

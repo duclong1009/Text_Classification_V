@@ -287,7 +287,7 @@ class GB_Dataset(Dataset):
         """ """
         tokens = self.tokenizer.batch_encode_plus(
             X,
-            pad_to_max_length=True,
+            padding="max_length",
             add_special_tokens=True,
             max_length=self.size_segment,
             return_attention_mask=True,  # 0: padded tokens, 1: not padded tokens; taking into account the sequence length
