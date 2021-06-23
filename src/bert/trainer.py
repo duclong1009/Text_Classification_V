@@ -70,7 +70,7 @@ def train_gru_fn(data_loader, model, optimizer, loss_fn, device):
     return train_loss / len(data_loader)
 
 
-def eval_gru_fn(data_loader, model, loss_fn, device, print_pred=False):
+def eval_gru_fn(data_loader, model, device, print_pred=False):
     model.eval()
     fin_targets = []
     fin_outputs = []

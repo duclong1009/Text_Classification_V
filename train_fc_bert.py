@@ -58,7 +58,7 @@ def main(arg):
     es = EarlyStopping(3, path=(path_save))
     for i in range(arg.epochs):
         loss = train_gru_fn(train_dataloader, model, optimizer, CE_Loss, device)
-        output, target = eval_gru_fn(val_dataloader, model, CE_Loss, device)
+        output, target = eval_gru_fn(val_dataloader, model, device)
         accuracy = sum(np.array(output) == np.array(target)) / len(target)
         print(
             "epochs {} / {}  train_loss : {}  val_acc : {}".format(
@@ -78,7 +78,7 @@ def main(arg):
         arg.size_shift,
     )
     test_dataloader = DataLoader(test_dataset, batch_size=arg.batch_size, shuffle=False)
-    output_test, target_test = eval_gru_fn(test_dataloader, model, CE_Loss, device)
+    output_test, target_test = eval_gru_fn(test_dataloader, model, device)
     test_acc = sum(np.array(output_test) == np.array(target_test)) / len(target_test)
     print("Accuracy test: ", test_acc)
 
