@@ -23,7 +23,7 @@ def train_fn(data_loader, model, optimizer, loss_fn, device):
     return train_loss / len(data_loader)
 
 
-def eval_fn(data_loader, model, device):
+def eval_fn(data_loader, model, device, print_pred=False):
     model.eval()
     fin_targets = []
     fin_outputs = []
@@ -44,6 +44,48 @@ def eval_fn(data_loader, model, device):
                 content_token_type_ids=token_type_ids,
             )
             output = torch.argmax(outputs, dim=-1)
+            if print_pred:
+                print(output, targets)
+            fin_targets.extend(targets.cpu().detach().numpy().tolist())
+            fin_outputs.extend(output.cpu().detach().numpy().tolist())
+    return fin_outputs, fin_targets
+
+
+def train_gru_fn(data_loader, model, optimizer, loss_fn, device):
+    model.train()
+    train_loss = 0
+    for bi, d in tqdm(enumerate(data_loader), total=len(data_loader)):
+        input = {
+            "input_ids": d["content_input_ids"].to(device),
+            "attention_mask": d["content_attention_mask"].to(device),
+            "token_type_ids": d["content_token_type_ids"].to(device),
+        }
+        label = d["label"].to(device)
+        optimizer.zero_grad()
+        outputs = model(input)
+        loss = loss_fn(outputs, label.long())
+        loss.backward()
+        optimizer.step()
+        train_loss += loss.item()
+    return train_loss / len(data_loader)
+
+
+def eval_gru_fn(data_loader, model, device, print_pred=False):
+    model.eval()
+    fin_targets = []
+    fin_outputs = []
+    with torch.no_grad():
+        for bi, d in tqdm(enumerate(data_loader), total=len(data_loader)):
+            input = {
+                "input_ids": d["content_input_ids"].to(device),
+                "attention_mask": d["content_attention_mask"].to(device),
+                "token_type_ids": d["content_token_type_ids"].to(device),
+            }
+            targets = d["label"].to(device)
+            outputs = model(input)
+            output = torch.argmax(outputs, dim=-1)
+            if print_pred:
+                print(output, targets)
             fin_targets.extend(targets.cpu().detach().numpy().tolist())
             fin_outputs.extend(output.cpu().detach().numpy().tolist())
     return fin_outputs, fin_targets
