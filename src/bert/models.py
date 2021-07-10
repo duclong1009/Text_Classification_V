@@ -160,7 +160,7 @@ class FC_BERT(nn.Module):
         output = self.bert_drop(output)
         output = output[:, 0, :]
         output = output.view(n_sentences, max_segments, self.size_token_embed)
-        output = output.view(n_sentences, -1)
+        output = output.reshape(n_sentences, -1)
         # output = torch.mean(output, dim=1)
 
         # output, hidden_state = self.gru(output)
